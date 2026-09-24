@@ -19,6 +19,18 @@ class Settings(BaseSettings):
     algorithm: str = Field(default="HS256", min_length=1)
     access_token_expire_minutes: int = Field(default=30, gt=0)
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def use_psycopg_driver(cls, value: object) -> object:
+        """Use psycopg 3 for PostgreSQL URLs supplied by hosting providers."""
+
+        if isinstance(value, str):
+            if value.startswith("postgres://"):
+                return value.replace("postgres://", "postgresql+psycopg://", 1)
+            if value.startswith("postgresql://"):
+                return value.replace("postgresql://", "postgresql+psycopg://", 1)
+        return value
+
     @field_validator("debug", mode="before")
     @classmethod
     def parse_debug(cls, value: object) -> object:

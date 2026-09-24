@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: internship-student-management-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: internship-student-management-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: APP_NAME
+        value: Internship and Student Management API
+      - key: DEBUG
+        value: "false"
+
+databases:
+  - name: internship-student-management-db
+    plan: free
+    databaseName: internship_management
+    user: internship_management_user

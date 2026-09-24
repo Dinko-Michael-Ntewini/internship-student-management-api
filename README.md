@@ -63,11 +63,13 @@ tests/
 |-- conftest.py
 |-- test_auth.py
 |-- test_applications.py
+|-- test_config.py
 |-- test_main.py
 |-- test_models.py
 |-- test_search_filtering.py
 |-- test_students.py
 `-- test_test_database.py
+render.yaml
 ```
 
 ## Database entities and relationship
@@ -130,6 +132,26 @@ Inspect and validate migration state:
 python -m alembic current
 python -m alembic check
 ```
+
+## Render deployment
+
+The root `render.yaml` Blueprint defines a free Python web service and a free Render PostgreSQL database. During Blueprint creation, Render injects the database's internal connection string as `DATABASE_URL`, generates `SECRET_KEY`, and sets the remaining non-secret environment variables. No production credentials are stored in this repository.
+
+Render settings:
+
+```text
+Build:  pip install -r requirements.txt
+Start:  uvicorn app.main:app --host 0.0.0.0 --port $PORT
+Health: /health
+```
+
+Free Render web services do not support pre-deploy commands. After the Blueprint creates the database, use its external database URL in a trusted local environment and run the migration before using database-backed endpoints:
+
+```powershell
+python -m alembic upgrade head
+```
+
+Do not commit the external database URL or generated secret. Render PostgreSQL is required for persistent deployment data; the local SQLite fallback is not used when Render supplies `DATABASE_URL`.
 
 ## Run locally
 
